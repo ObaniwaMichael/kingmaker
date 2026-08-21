@@ -134,9 +134,9 @@ export const caseStudies = [
       "Reduced administrative workload by 60% through automation"
     ],
     images: [
-      "https://s.wordpress.com/mshots/v1/https%3A%2F%2Fadmin.springbase.com.ng%2F?w=1200",
-      "https://s.wordpress.com/mshots/v1/https%3A%2F%2Fparents.springbase.com.ng%2F?w=1200",
-      "https://s.wordpress.com/mshots/v1/https%3A%2F%2Fstudents.springbase.com.ng%2F?w=1200"
+      "assets/project-springbase-admin.jpg",
+      "assets/project-springbase-parents.jpg",
+      "assets/project-springbase-students.jpg"
     ],
     liveUrl: "https://www.springbase.com.ng/",
     githubUrl: null
@@ -172,7 +172,7 @@ export const caseStudies = [
       "Client acquisition: Multiple successful service bookings from website"
     ],
     images: [
-      "https://s.wordpress.com/mshots/v1/https%3A%2F%2Ffolashayeglobal.com%2F?w=1200"
+      "assets/project-folashaye.jpg"
     ],
     liveUrl: "https://folashayeglobal.com/",
     githubUrl: null
@@ -208,7 +208,7 @@ export const caseStudies = [
       "Foundation for future business listing expansion"
     ],
     images: [
-      "https://s.wordpress.com/mshots/v1/https%3A%2F%2Fshopmaster.folashayeglobal.com%2F?w=1200"
+      "assets/project-shopmaster.jpg"
     ],
     liveUrl: "https://shopmaster.folashayeglobal.com/",
     githubUrl: null
@@ -248,7 +248,7 @@ export const caseStudies = [
       "User-friendly interface requiring no data science expertise"
     ],
     images: [
-      "https://s.wordpress.com/mshots/v1/https%3A%2F%2Finsightpilot-drab.vercel.app%2F?w=1200"
+      "assets/project-insightpilot.jpg"
     ],
     liveUrl: "https://insightpilot-drab.vercel.app/",
     githubUrl: null
@@ -282,7 +282,7 @@ export const caseStudies = [
       "Privacy: Zero data breaches, 100% compliance"
     ],
     images: [
-      "/assets/MindSpace AI - Mental Wellness & Productivity Coach - Google Chrome 8_27_2025 12_13_26 AM.png"
+      "assets/project-mindspace.png"
     ],
     liveUrl: "https://mindspace-ai.vercel.app/auth",
     githubUrl: null
@@ -316,7 +316,7 @@ export const caseStudies = [
       "Admission inquiries: 50% increase from website"
     ],
     images: [
-      "https://s.wordpress.com/mshots/v1/https%3A%2F%2Fwww.springbase.com.ng%2F?w=1200"
+      "assets/project-springbase-school.jpg"
     ],
     liveUrl: "https://www.springbase.com.ng/",
     githubUrl: null

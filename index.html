@@ -103,7 +103,7 @@
           <div class="character">
             <div class="slideshow-container">
               <div class="slide" data-animation="slideInFromRight">
-                <img src="/assets/0bc01043-fdda-425b-83dc-b9a7b8c767cf-removebg-preview%20(1).png" alt="Character 2" class="character-image" loading="lazy">
+                <img src="/assets/0bc01043-fdda-425b-83dc-b9a7b8c767cf-removebg-preview%20(1).png" alt="Character 2" class="character-image" loading="eager" fetchpriority="high">
               </div>
               <div class="slide" data-animation="slideInFromLeft">
                 <img src="/assets/3c8dd89c-93cc-4e49-b48b-e44e2057b8b0-removebg-preview.png" alt="Character 3" class="character-image" loading="lazy">
@@ -138,12 +138,6 @@
              <button class="btn btn-download" id="cvBtn">Download CV</button>
            </div>
         </section>
-        <!-- AI Chat Button - Floating Action Button -->
-        <div class="ai-chat-fab" id="aiChatFab">
-          <div class="ai-chat-icon">🤖</div>
-          <div class="ai-chat-label">AI Assistant</div>
-        </div>
-
         <!-- Cube Game Button - Mini Floating Button -->
         <div class="cube-game-fab" id="cubeGameFab" title="Play Cube Game">
           <div class="cube-game-icon">🎲</div>
@@ -153,29 +147,6 @@
         <div class="orrery-fab" id="orreryFab" title="Interactive Solar System">
           <div class="orrery-icon">🪐</div>
         </div>
-
-        <!-- AI Chat Modal -->
-        <div class="ai-chat-modal" id="aiChatModal">
-          <div class="ai-chat-header">
-            <div class="ai-chat-title">
-              <span class="ai-avatar">🤖</span>
-              <span>RaidBot</span>
-            </div>
-            <button class="ai-chat-close" id="aiChatClose">×</button>
-          </div>
-          
-          <div class="ai-chat-messages" id="aiChatMessages">
-            <!-- Welcome message will be added here -->
-          </div>
-          
-          <div class="ai-chat-input-container">
-            <input type="text" class="ai-chat-input" id="aiChatInput" placeholder="Ask me about this portfolio...">
-            <button class="ai-chat-send" id="aiChatSend">➤</button>
-          </div>
-        </div>
-
-        <!-- AI Chat Overlay -->
-        <div class="ai-chat-overlay" id="aiChatOverlay"></div>
       </main>
 
       <!-- Footer -->
@@ -248,8 +219,7 @@
          </div>
          <div class="modal-footer">
            <div class="cv-download-options">
-             <button class="btn btn-primary" id="downloadCvPdfBtn">Download PDF</button>
-             <button class="btn btn-secondary" id="downloadCvDocxBtn">Download DOCX</button>
+             <button class="btn btn-primary" id="downloadCvPdfBtn">Download CV</button>
            </div>
            <button class="btn btn-secondary" id="closeCvModalBtn">Close</button>
          </div>

@@ -1,4 +1,4 @@
-// Particles system
+﻿// Particles system
 class Particle {
   constructor(canvas, ctx) {
     this.canvas = canvas;
@@ -125,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
   
   initModals();
   initNavigationDropdown();
-  initEntranceAnimations();
 });
 
 // Modal functionality
@@ -168,36 +167,19 @@ function initModals() {
     });
   }
 
-  // CV Download Buttons
+  // CV Download Button
   const downloadCvPdfBtn = document.getElementById('downloadCvPdfBtn');
-  const downloadCvDocxBtn = document.getElementById('downloadCvDocxBtn');
 
   if (downloadCvPdfBtn) {
     downloadCvPdfBtn.addEventListener('click', () => {
       try {
-        // Download PDF version
         const link = document.createElement('a');
         link.href = '/Michael_cv.pdf';
-        link.download = 'Michael cv.pdf';
+        link.download = 'Obaniwa_Michael_Resume.pdf';
         link.click();
       } catch (error) {
         console.error('Error downloading CV PDF:', error);
         alert('Unable to download CV PDF. Please contact me directly for my CV.');
-      }
-    });
-  }
-
-  if (downloadCvDocxBtn) {
-    downloadCvDocxBtn.addEventListener('click', () => {
-      try {
-        // Download DOCX version
-        const link = document.createElement('a');
-        link.href = '/Michael_cv.docx';
-        link.download = 'Michael cv.docx';
-        link.click();
-      } catch (error) {
-        console.error('Error downloading CV DOCX:', error);
-        alert('Unable to download CV DOCX. Please contact me directly for my CV.');
       }
     });
   }
@@ -558,72 +540,6 @@ function createThemeIndicator() {
 // Initialize theme indicator
 setTimeout(createThemeIndicator, 1000);
 
-// Entrance animations for containers
-function initEntranceAnimations() {
-  // Add staggered entrance animations for content inside containers
-  const leftSection = document.querySelector('.left-section');
-  const rightSection = document.querySelector('.right-section');
-  const characterContainer = document.querySelector('.character-container');
-  
-  // Animate content inside left section
-  if (leftSection) {
-    const leftContent = leftSection.querySelectorAll('.section-title, .section-text, .cta-buttons');
-    leftContent.forEach((element, index) => {
-      element.style.opacity = '0';
-      element.style.transform = 'translateY(20px)';
-      element.style.transition = 'all 0.6s ease';
-      
-      setTimeout(() => {
-        element.style.opacity = '1';
-        element.style.transform = 'translateY(0)';
-      }, 1200 + (index * 200)); // Start after left section slides in
-    });
-  }
-  
-  // Animate content inside right section
-  if (rightSection) {
-    const rightContent = rightSection.querySelectorAll('.section-title, .section-text, .cta-buttons');
-    rightContent.forEach((element, index) => {
-      element.style.opacity = '0';
-      element.style.transform = 'translateY(20px)';
-      element.style.transition = 'all 0.6s ease';
-      
-      setTimeout(() => {
-        element.style.opacity = '1';
-        element.style.transform = 'translateY(0)';
-      }, 1500 + (index * 200)); // Start after right section slides in
-    });
-  }
-  
-  // Animate character image and scroll indicator
-  if (characterContainer) {
-    const characterImage = characterContainer.querySelector('.character-image');
-    const scrollIndicator = characterContainer.querySelector('.scroll-indicator');
-    
-    if (characterImage) {
-      characterImage.style.opacity = '0';
-      characterImage.style.transform = 'scale(0.8)';
-      characterImage.style.transition = 'all 0.8s ease';
-      
-      setTimeout(() => {
-        characterImage.style.opacity = '1';
-        characterImage.style.transform = 'scale(1)';
-      }, 1800); // Start after character container rises up
-    }
-    
-    if (scrollIndicator) {
-      scrollIndicator.style.opacity = '0';
-      scrollIndicator.style.transform = 'translateY(20px)';
-      scrollIndicator.style.transition = 'all 0.6s ease';
-      
-      setTimeout(() => {
-        scrollIndicator.style.opacity = '1';
-        scrollIndicator.style.transform = 'translateY(0)';
-      }, 2200); // Start after character image appears
-    }
-  }
-}
-
 // Contact button functionality across all pages
 function initContactButton() {
   const contactBtn = document.getElementById('contactBtn');
@@ -748,333 +664,6 @@ function initCvModal() {
   }
 }
 
-  // AI Chat System - Gemini AI Assistant (Vercel Version)
-class PortfolioAIAssistant {
-  constructor() {
-    this.messages = [];
-    this.isOpen = false;
-    // Use robust AI API endpoint
-    this.apiUrl = '/api/ai';
-    this.retryCount = 0;
-    this.maxRetries = 3;
-    this.isRetrying = false;
-    this.init();
-  }
-
-  init() {
-    this.fab = document.getElementById('aiChatFab');
-    this.modal = document.getElementById('aiChatModal');
-    this.overlay = document.getElementById('aiChatOverlay');
-    this.messagesContainer = document.getElementById('aiChatMessages');
-    this.input = document.getElementById('aiChatInput');
-    this.sendBtn = document.getElementById('aiChatSend');
-    this.closeBtn = document.getElementById('aiChatClose');
-
-    this.bindEvents();
-    this.addWelcomeMessage();
-  }
-
-  bindEvents() {
-    // Open chat
-    this.fab.addEventListener('click', () => this.openChat());
-    
-    // Close chat
-    this.closeBtn.addEventListener('click', () => this.closeChat());
-    this.overlay.addEventListener('click', () => this.closeChat());
-    
-    // Send message
-    this.sendBtn.addEventListener('click', () => this.sendMessage());
-    this.input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') this.sendMessage();
-    });
-
-    // Close on escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && this.isOpen) this.closeChat();
-    });
-  }
-
-  openChat() {
-    this.isOpen = true;
-    this.modal.classList.add('show');
-    this.overlay.classList.add('show');
-    this.input.focus();
-    document.body.style.overflow = 'hidden';
-  }
-
-  closeChat() {
-    this.isOpen = false;
-    this.modal.classList.remove('show');
-    this.overlay.classList.remove('show');
-    document.body.style.overflow = 'auto';
-  }
-
-  addWelcomeMessage() {
-    const welcomeMessage = {
-      type: 'ai',
-      content: `👋 Hello! I'm RaidBot, your Portfolio AI Assistant powered by Gemini! 
-
-I can help you understand this portfolio and answer questions about:
-• The developer's skills and technologies
-• Projects showcased here
-• How to navigate the site
-• Contact information
-• And much more!
-
-What would you like to know? 😊`
-    };
-    this.addMessage(welcomeMessage);
-  }
-
-  async sendMessage() {
-    const userInput = this.input.value.trim();
-    if (!userInput) return;
-
-    // Add user message
-    this.addMessage({ type: 'user', content: userInput });
-    this.input.value = '';
-
-    // Show typing indicator
-    this.showTypingIndicator();
-
-    try {
-      // Get AI response from Gemini API
-      const aiResponse = await this.getAIResponse(userInput);
-      this.hideTypingIndicator();
-      this.addMessage({ type: 'ai', content: aiResponse });
-    } catch (error) {
-      this.hideTypingIndicator();
-      this.showErrorMessage(error);
-    }
-  }
-
-  async getAIResponse(userInput) {
-    return await this.executeWithRetry(async () => {
-      const response = await fetch(this.apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: userInput }),
-        signal: AbortSignal.timeout(30000) // 30 second timeout
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const error = new Error(errorData.error || `HTTP ${response.status}`);
-        error.statusCode = response.status;
-        error.type = this.classifyErrorType(response.status);
-        throw error;
-      }
-
-      const data = await response.json();
-      
-      if (!data.success) {
-        const error = new Error(data.error || 'AI service error');
-        error.type = data.type || 'UNKNOWN';
-        error.correlationId = data.correlationId;
-        throw error;
-      }
-
-      return data.response;
-    });
-  }
-
-  async executeWithRetry(operation) {
-    let lastError;
-    
-    for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
-      try {
-        this.retryCount = attempt;
-        this.isRetrying = attempt > 0;
-        
-        if (attempt > 0) {
-          console.log(`Retrying AI request (attempt ${attempt + 1}/${this.maxRetries + 1})`);
-          await this.sleep(this.calculateDelay(attempt));
-        }
-        
-        return await operation();
-      } catch (error) {
-        lastError = error;
-        
-        if (!this.shouldRetry(error, attempt)) {
-          throw error;
-        }
-        
-        if (attempt === this.maxRetries) {
-          throw error;
-        }
-      }
-    }
-    
-    throw lastError;
-  }
-
-  shouldRetry(error, attempt) {
-    if (attempt >= this.maxRetries) return false;
-    if (error.type === 'API_KEY') return false;
-    if (error.statusCode >= 400 && error.statusCode < 500 && error.statusCode !== 429) return false;
-    return true;
-  }
-
-  calculateDelay(attempt) {
-    const baseDelay = 1000;
-    const maxDelay = 10000;
-    const multiplier = 2;
-    
-    let delay = baseDelay * Math.pow(multiplier, attempt);
-    delay = Math.min(delay, maxDelay);
-    return delay * (0.5 + Math.random() * 0.5); // Add jitter
-  }
-
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  classifyErrorType(statusCode) {
-    switch (statusCode) {
-      case 400:
-      case 422:
-        return 'CLIENT_ERROR';
-      case 401:
-      case 403:
-        return 'API_KEY_ERROR';
-      case 429:
-        return 'RATE_LIMIT';
-      case 408:
-        return 'TIMEOUT';
-      case 500:
-      case 502:
-      case 503:
-      case 504:
-        return 'SERVER_ERROR';
-      default:
-        return 'UNKNOWN';
-    }
-  }
-
-  showTypingIndicator() {
-    const typingDiv = document.createElement('div');
-    typingDiv.className = 'ai-message ai';
-    typingDiv.id = 'typing-indicator';
-    typingDiv.innerHTML = `
-      <div class="ai-message-avatar">🤖</div>
-      <div class="ai-message-content">
-        <div class="typing-dots">
-          <span></span><span></span><span></span>
-        </div>
-      </div>
-    `;
-    this.messagesContainer.appendChild(typingDiv);
-    this.scrollToBottom();
-  }
-
-  hideTypingIndicator() {
-    const typingIndicator = document.getElementById('typing-indicator');
-    if (typingIndicator) {
-      typingIndicator.remove();
-    }
-  }
-
-  addMessage(message) {
-    this.messages.push(message);
-    
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `ai-message ${message.type}`;
-    
-    const avatar = message.type === 'user' ? '👤' : '🤖';
-    const avatarClass = message.type === 'user' ? 'user' : 'ai';
-    
-    const safeContent = (message.content || '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/\n\n/g, '<br><br>')
-      .replace(/\n/g, '<br>');
-    
-    messageDiv.innerHTML = `
-      <div class="ai-message-avatar ${avatarClass}">${avatar}</div>
-      <div class="ai-message-content">${safeContent}</div>
-    `;
-    
-    this.messagesContainer.appendChild(messageDiv);
-    this.scrollToBottom();
-  }
-
-  scrollToBottom() {
-    this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
-  }
-
-  showErrorMessage(error) {
-    let errorMessage = this.getUserFriendlyErrorMessage(error);
-    let canRetry = this.canRetry(error);
-    
-    let retryButton = '';
-    if (canRetry && this.retryCount < this.maxRetries) {
-      retryButton = `<br><br><button onclick="aiAssistant.retryLastMessage()" class="ai-retry-button">Retry (${this.retryCount}/${this.maxRetries})</button>`;
-    }
-    
-    this.addMessage({ 
-      type: 'ai', 
-      content: `⚠️ ${errorMessage}${retryButton}` 
-    });
-  }
-
-  getUserFriendlyErrorMessage(error) {
-    switch (error.type) {
-      case 'CLIENT_ERROR':
-        return 'Invalid request. Please check your message and try again.';
-      case 'API_KEY_ERROR':
-        return 'AI service is not properly configured. Please contact support.';
-      case 'RATE_LIMIT':
-        return 'AI service is busy. Please wait a moment and try again.';
-      case 'TIMEOUT':
-        return 'Request timed out. Please try again.';
-      case 'SERVER_ERROR':
-        return 'AI service is temporarily unavailable. Please try again in a moment.';
-      case 'NETWORK':
-        return 'Unable to connect to AI service. Please check your internet connection.';
-      default:
-        if (error.message.includes('Failed to fetch')) {
-          return 'Unable to connect to the AI service. Please check your internet connection or try again later.';
-        } else if (error.message.includes('timeout')) {
-          return 'Request timed out. Please try again.';
-        } else if (error.message.includes('500')) {
-          return 'AI service is experiencing issues. Please try again later.';
-        }
-        return 'Something went wrong. Please try again or contact support if the issue persists.';
-    }
-  }
-
-  canRetry(error) {
-    if (this.retryCount >= this.maxRetries) return false;
-    if (error.type === 'API_KEY_ERROR') return false;
-    if (error.type === 'CLIENT_ERROR') return false;
-    return true;
-  }
-
-  async retryLastMessage() {
-    if (this.messages.length === 0) return;
-    
-    const lastUserMessage = [...this.messages].reverse().find(msg => msg.type === 'user');
-    if (!lastUserMessage) return;
-    
-    try {
-      this.isRetrying = true;
-      this.showTypingIndicator();
-      
-      const aiResponse = await this.getAIResponse(lastUserMessage.content);
-      this.hideTypingIndicator();
-      this.addMessage({ type: 'ai', content: aiResponse });
-    } catch (error) {
-      this.hideTypingIndicator();
-      this.showErrorMessage(error);
-    } finally {
-      this.isRetrying = false;
-    }
-  }
-}
-
 // Cube Game Button Functionality
 function initCubeGameButton() {
   const cubeGameFab = document.getElementById('cubeGameFab');
@@ -1127,16 +716,13 @@ function initOrreryButton() {
   }
 }
 
-// Initialize AI Chat when DOM is loaded
+// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize existing functionality
   initNavigationDropdown();
   initContactButton();
   
   // CV Modal will be initialized when the button is clicked
-  
-  // Initialize AI Chat
-  new PortfolioAIAssistant();
   
   // Initialize Cube Game Button
   initCubeGameButton();

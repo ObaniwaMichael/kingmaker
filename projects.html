@@ -4,10 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="style.css">
-    <title>Projects • Obaniwa Michael</title>
-    <link rel="preload" as="image" href="/assets/m1.png" fetchpriority="high">
-    <link rel="preload" as="image" href="/assets/m2.png" fetchpriority="high">
-    <link rel="preload" as="image" href="/assets/m3.png">
+    <title>Projects ÎÃÃ³ Obaniwa Michael</title>
+    <link rel="preload" as="image" href="assets/m1.png">
     <style>
       /* Page-specific styles (kept minimal and scoped) */
       :root {
@@ -20,6 +18,21 @@
         height: 100vh;
         scroll-behavior: smooth;
         -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255,255,255,0.2) transparent;
+      }
+      .projects-snap-container::-webkit-scrollbar {
+        width: 8px;
+      }
+      .projects-snap-container::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .projects-snap-container::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.2);
+        border-radius: 4px;
+      }
+      .projects-snap-container::-webkit-scrollbar-thumb:hover {
+        background: rgba(255,255,255,0.3);
       }
       .project-panel {
         scroll-snap-align: start;
@@ -67,7 +80,6 @@
         position: relative;
         perspective: 1200px;
         z-index: 1;
-        opacity: 1 !important; /* Force visible - images need to show */
       }
       .project-card {
         background: rgba(20,20,30,.45);
@@ -78,70 +90,77 @@
         transform: rotateX(6deg) rotateY(-6deg);
         box-shadow: 0 20px 60px rgba(0,0,0,.35),
                     0 0 40px rgba(120,80,255,.1);
-        transition: box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transition: box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                    transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         position: relative;
         min-height: 300px;
         transform-style: preserve-3d;
-        opacity: 1 !important; /* Force visible - images need to show */
+        will-change: transform, box-shadow;
       }
       .project-card:hover {
         box-shadow: 0 25px 70px rgba(0,0,0,.45),
                     0 0 60px rgba(120,80,255,.2);
-        /* Transform handled by GSAP, only enhance shadow on hover */
+        transform: rotateX(4deg) rotateY(-4deg) translateY(-5px);
       }
       .project-card.image-loaded {
-        will-change: auto;
+        will-change: transform, box-shadow;
       }
       .project-card img { 
         display:block; 
         width:100%; 
         height:auto; 
-        opacity: 1 !important; /* Force visible - override any GSAP or other styles */
-        transition: opacity 0.3s ease-in-out, filter 0.3s ease-in-out;
-        object-fit: cover;
+        opacity: 1;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        transform: translateZ(0);
         min-height: 200px;
-        background: rgba(20,20,30,.3);
-        /* Show images immediately - don't hide them */
-      }
-      .project-card img.loading {
-        opacity: 1 !important; /* Still visible while loading */
-        filter: blur(1px);
+        object-fit: cover;
+        background: linear-gradient(135deg, rgba(20,20,30,0.6) 0%, rgba(40,40,50,0.4) 100%);
       }
       .project-card img.loaded {
-        opacity: 1 !important;
-        filter: none;
+        opacity: 1;
       }
-      .project-card img[src=""],
-      .project-card img:not([src]) {
-        opacity: 0.5;
+      .project-card img.error {
+        object-fit: contain;
+        padding: 2rem;
+      }
+      .project-card.image-error {
+        border-color: rgba(255,255,255,0.1);
       }
       .project-card::after {
         content: '';
         position: absolute;
         inset: 0;
         background: linear-gradient(90deg, 
-          rgba(255,255,255,0.02) 0%, 
-          rgba(255,255,255,0.05) 50%, 
-          rgba(255,255,255,0.02) 100%);
+          rgba(255,255,255,0.03) 0%, 
+          rgba(255,255,255,0.08) 50%, 
+          rgba(255,255,255,0.03) 100%);
         background-size: 200% 100%;
-        animation: shimmer 2s infinite;
+        animation: shimmer 2s ease-in-out infinite;
         z-index: 1;
         border-radius: 16px;
         pointer-events: none;
-        opacity: 0.5;
-        transition: opacity 0.3s ease;
+        opacity: 1;
+        transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: background-position, opacity;
       }
       .project-card.image-loaded::after {
         opacity: 0;
         animation: none;
-      }
-      .project-card img.loading + .project-card::after,
-      .project-card:has(img.loading)::after {
-        opacity: 0.5;
+        will-change: auto;
       }
       @keyframes shimmer {
         0% { background-position: -200% 0; }
         100% { background-position: 200% 0; }
+      }
+      /* Optimize for GPU acceleration */
+      .project-panel {
+        contain: layout style paint;
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .project-panel * {
+          scroll-behavior: smooth;
+        }
       }
       .panel-accent {
         position: absolute; inset: -2px; border-radius: 18px;
@@ -152,63 +171,9 @@
       }
       .snap-indicator { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); font-size: .85rem; opacity: .7; }
       @media (max-width: 960px){
-        .project-panel { 
-          grid-template-columns: 1fr; 
-          gap: 1.5rem; 
-          padding: 6vh 4vw;
-          min-height: auto;
-        }
+        .project-panel { grid-template-columns: 1fr; gap: 1.25rem; padding: 8vh 5vw; }
         .project-card { 
-          transform: none !important;
-          min-height: 250px;
-        }
-        .project-info h2 {
-          font-size: 1.5rem;
-        }
-        .project-info p {
-          font-size: 0.9rem;
-        }
-        .tech-tags {
-          gap: 0.4rem;
-        }
-        .tech-tags .tag {
-          font-size: 0.75rem;
-          padding: 0.3rem 0.5rem;
-        }
-        .project-links {
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-        .project-links a,
-        .project-links button {
-          width: 100%;
-          text-align: center;
-        }
-        .project-filters {
-          overflow-x: auto;
-          -webkit-overflow-scrolling: touch;
-          padding-bottom: 0.5rem;
-        }
-        .project-filters button {
-          white-space: nowrap;
-          flex-shrink: 0;
-        }
-        .snap-indicator {
-          font-size: 0.75rem;
-          bottom: 12px;
-        }
-      }
-      
-      @media (max-width: 480px){
-        .project-panel {
-          padding: 5vh 3vw;
-          gap: 1.25rem;
-        }
-        .project-info h2 {
-          font-size: 1.25rem;
-        }
-        .project-card {
-          min-height: 200px;
+          transform: none !important; 
         }
       }
       
@@ -220,6 +185,35 @@
           animation: none !important;
           transition: none !important;
         }
+        .project-card img {
+          transition: opacity 0.2s ease !important;
+        }
+      }
+      
+      /* Performance optimizations */
+      .project-panel {
+        content-visibility: auto;
+        contain-intrinsic-size: auto 100vh;
+      }
+      
+      /* Improve image loading appearance */
+      .project-card:not(.image-loaded) {
+        background: linear-gradient(135deg, 
+          rgba(20,20,30,0.8) 0%, 
+          rgba(30,30,40,0.6) 50%,
+          rgba(20,20,30,0.8) 100%);
+        background-size: 200% 200%;
+        animation: gradient-shift 3s ease infinite;
+      }
+      
+      @keyframes gradient-shift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+      }
+      
+      .project-card.image-loaded {
+        background: rgba(20,20,30,.45);
+        animation: none;
       }
     </style>
   </head>
@@ -250,7 +244,7 @@
           <a href="about.html" class="nav-link">About</a>
           <button class="nav-link contact-btn" id="headerContactBtn">Contact Me</button>
          </nav>
-        <div class="header-actions"><button class="icon-btn search-btn">🔍</button></div>
+        <div class="header-actions"><button class="icon-btn search-btn">â¡ÆÃ¶Ã¬</button></div>
       </header>
 
       <main class="main-content">
@@ -284,7 +278,7 @@
             <article class="project-panel" data-accent data-tags="html5,css3,javascript,threejs">
               <div class="project-info">
                 <h2>Personal Portfolio</h2>
-                <p>Modern, responsive portfolio with glass morphism, 3D background, and interactive micro‑interactions.</p>
+                <p>Modern, responsive portfolio with glass morphism, 3D background, and interactive microÎÃÃ¦interactions.</p>
                 <div class="tech-tags">
                   <span class="tag">HTML5</span><span class="tag">CSS3</span><span class="tag">JavaScript</span><span class="tag">Three.js</span>
                 </div>
@@ -296,13 +290,13 @@
               <div class="project-media">
                 <div class="project-card">
                   <img 
-                    src="/assets/m1.png" 
+                    src="assets/m1.png" 
                     alt="Personal Portfolio"
                     loading="eager"
                     fetchpriority="high"
                     decoding="async"
-                    width="800"
-                    height="600"
+                    width="1200"
+                    height="900"
                   >
                 </div>
                 <div class="panel-accent"></div>
@@ -325,13 +319,12 @@
               <div class="project-media">
                 <div class="project-card">
                   <img 
-                    src="/assets/m2.png" 
+                    src="assets/m2.png" 
                     alt="Lover's Code"
-                    loading="eager"
-                    fetchpriority="high"
+                    loading="lazy"
                     decoding="async"
-                    width="800"
-                    height="600"
+                    width="1200"
+                    height="900"
                   >
                 </div>
                 <div class="panel-accent"></div>
@@ -354,12 +347,12 @@
               <div class="project-media">
                 <div class="project-card">
                   <img 
-                    src="/assets/m3.png" 
+                    src="assets/m3.png" 
                     alt="Tife's Gourmet"
-                    loading="eager"
+                    loading="lazy"
                     decoding="async"
-                    width="800"
-                    height="600"
+                    width="1200"
+                    height="900"
                   >
                 </div>
                 <div class="panel-accent"></div>
@@ -382,11 +375,12 @@
               <div class="project-media">
                 <div class="project-card">
                   <img 
-                    src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fadmin.springbase.com.ng%2F?w=1200" 
+                    src="assets/project-springbase-admin.jpg" 
                     alt="Springbase School Management System - Admin Portal"
                     loading="lazy"
                     decoding="async"
-                    referrerpolicy="no-referrer"
+                    width="1200"
+                    height="900"
                   >
                 </div>
                 <div class="panel-accent"></div>
@@ -409,11 +403,12 @@
               <div class="project-media">
                 <div class="project-card">
                   <img 
-                    src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Ffolashayeglobal.com%2F?w=1200" 
+                    src="assets/project-folashaye.jpg" 
                     alt="Folashaye Global"
                     loading="lazy"
                     decoding="async"
-                    referrerpolicy="no-referrer"
+                    width="1200"
+                    height="900"
                   >
                 </div>
                 <div class="panel-accent"></div>
@@ -436,11 +431,12 @@
               <div class="project-media">
                 <div class="project-card">
                   <img 
-                    src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fshopmaster.folashayeglobal.com%2F?w=1200" 
+                    src="assets/project-shopmaster.jpg" 
                     alt="ShopMaster"
                     loading="lazy"
                     decoding="async"
-                    referrerpolicy="no-referrer"
+                    width="1200"
+                    height="900"
                   >
                 </div>
                 <div class="panel-accent"></div>
@@ -463,11 +459,12 @@
               <div class="project-media">
                 <div class="project-card">
                   <img 
-                    src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Finsightpilot-drab.vercel.app%2F?w=1200" 
+                    src="assets/project-insightpilot.jpg" 
                     alt="InsightPilot"
                     loading="lazy"
                     decoding="async"
-                    referrerpolicy="no-referrer"
+                    width="1200"
+                    height="900"
                   >
                 </div>
                 <div class="panel-accent"></div>
@@ -478,7 +475,7 @@
             <article class="project-panel" data-accent data-tags="nextjs,typescript,tailwind,vercel">
               <div class="project-info">
                 <h2>MindSpace AI</h2>
-                <p>Mental wellness assistant with Google auth and AI‑driven guidance, deployed on Vercel.</p>
+                <p>Mental wellness assistant with Google auth and AIÎÃÃ¦driven guidance, deployed on Vercel.</p>
                 <div class="tech-tags">
                   <span class="tag">Next.js</span><span class="tag">TypeScript</span><span class="tag">Tailwind</span><span class="tag">Vercel</span>
                 </div>
@@ -490,10 +487,12 @@
               <div class="project-media">
                 <div class="project-card">
                   <img 
-                    src="/assets/MindSpace%20AI%20-%20Mental%20Wellness%20%26%20Productivity%20Coach%20-%20Google%20Chrome%208_27_2025%2012_13_26%20AM.png" 
+                    src="/assets/project-mindspace.png" 
                     alt="MindSpace AI"
                     loading="lazy"
                     decoding="async"
+                    width="1200"
+                    height="900"
                   >
                 </div>
                 <div class="panel-accent"></div>
@@ -516,11 +515,12 @@
               <div class="project-media">
                 <div class="project-card">
                   <img 
-                    src="https://s.wordpress.com/mshots/v1/https%3A%2F%2Fwww.springbase.com.ng%2F?w=1200" 
+                    src="assets/project-springbase-school.jpg" 
                     alt="Springbase Website"
                     loading="lazy"
                     decoding="async"
-                    referrerpolicy="no-referrer"
+                    width="1200"
+                    height="900"
                   >
                 </div>
                 <div class="panel-accent"></div>
@@ -528,7 +528,7 @@
             </article>
           </div>
           
-          <div class="snap-indicator">Scroll • • •</div>
+          <div class="snap-indicator">Scroll ÎÃÃ³ ÎÃÃ³ ÎÃÃ³</div>
           
           <div class="cta-buttons" style="margin-top: 2rem;">
             <a href="index.html" class="btn btn-secondary">Back to Home</a>
@@ -545,28 +545,6 @@
         </div>
       </footer>
       
-      <!-- AI Chat Button - Floating Action Button -->
-      <div class="ai-chat-fab" id="aiChatFab">
-        <div class="ai-chat-icon">🤖</div>
-        <div class="ai-chat-label">AI Assistant</div>
-      </div>
-
-      <!-- AI Chat Modal (full markup to match main.js) -->
-      <div class="ai-chat-modal" id="aiChatModal">
-        <div class="ai-chat-header">
-          <div class="ai-chat-title">
-            <span class="ai-avatar">🤖</span>
-            <span>RaidBot</span>
-          </div>
-          <button class="ai-chat-close" id="aiChatClose">×</button>
-        </div>
-        <div class="ai-chat-messages" id="aiChatMessages"></div>
-        <div class="ai-chat-input-container">
-          <input type="text" class="ai-chat-input" id="aiChatInput" placeholder="Ask me about this portfolio...">
-          <button class="ai-chat-send" id="aiChatSend">➤</button>
-        </div>
-      </div>
-      <div class="ai-chat-overlay" id="aiChatOverlay"></div>
     </div>
 
     <!-- Case Study Modal -->
@@ -580,7 +558,7 @@
               <span class="case-study-duration"></span>
             </div>
           </div>
-          <button class="close-btn" id="closeCaseStudyModal" aria-label="Close case study">×</button>
+          <button class="close-btn" id="closeCaseStudyModal" aria-label="Close case study">âÃ¹</button>
         </div>
         
         <div class="modal-body case-study-body">
@@ -608,11 +586,11 @@
             <h3 class="case-study-section-title">Visual Showcase</h3>
             <div class="case-study-gallery">
               <div class="case-study-gallery-container">
-                <button class="gallery-nav gallery-prev" aria-label="Previous image">‹</button>
+                <button class="gallery-nav gallery-prev" aria-label="Previous image">ÎÃâ£</button>
                 <div class="gallery-viewport">
                   <div class="gallery-track"></div>
                 </div>
-                <button class="gallery-nav gallery-next" aria-label="Next image">›</button>
+                <button class="gallery-nav gallery-next" aria-label="Next image">ÎÃâ</button>
               </div>
               <div class="gallery-indicators"></div>
             </div>
@@ -676,180 +654,33 @@
         if (initial) applyFilter(initial); else applyFilter('all');
       })();
 
-      // CRITICAL: Image Loading - Force images to show immediately
+      // Local image load markers (shimmer off once decoded)
       (function() {
-        // Force all image containers to be visible immediately
-        const projectCards = document.querySelectorAll('.project-card');
-        const projectMedia = document.querySelectorAll('.project-media');
-        
-        projectCards.forEach(card => {
-          card.style.opacity = '1';
-          card.style.visibility = 'visible';
-        });
-        
-        projectMedia.forEach(media => {
-          media.style.opacity = '1';
-          media.style.visibility = 'visible';
-        });
-        
         const projectImages = document.querySelectorAll('.project-card img');
-        
-        // Force all images to be visible immediately
-        projectImages.forEach(img => {
-          img.style.opacity = '1';
-          img.style.visibility = 'visible';
-          img.style.display = 'block';
-        });
-        
-        // Function to handle image load
-        function handleImageLoad(img) {
-          img.classList.remove('loading');
+        const placeholderSVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect fill='%2314141e' width='800' height='600'/%3E%3Ctext fill='%23808080' font-family='sans-serif' font-size='18' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3EImage not available%3C/text%3E%3C/svg%3E`;
+
+        function markLoaded(img) {
           img.classList.add('loaded');
-          img.style.opacity = '1';
-          img.style.visibility = 'visible';
           const card = img.closest('.project-card');
-          if (card) {
-            card.classList.add('image-loaded');
-            card.style.opacity = '1';
-          }
+          if (card) card.classList.add('image-loaded');
         }
 
-        // Function to handle image error - show immediately with fallback
-        function handleImageError(img) {
-          img.classList.remove('loading');
+        function markError(img) {
           img.classList.add('loaded', 'error');
-          img.style.opacity = '1';
-          img.style.visibility = 'visible';
+          img.src = placeholderSVG;
+          img.alt = (img.alt || 'Project') + ' (Image unavailable)';
           const card = img.closest('.project-card');
-          if (card) {
-            card.classList.add('image-loaded');
-            card.style.opacity = '1';
-          }
-          
-          // Show placeholder immediately
-          img.style.backgroundColor = 'rgba(20,20,30,.6)';
-          img.style.minHeight = '200px';
-          
-          // Create fallback text if image fails
-          if (!img.dataset.fallbackAdded) {
-            img.dataset.fallbackAdded = 'true';
-            const fallback = document.createElement('div');
-            fallback.className = 'image-fallback';
-            fallback.textContent = img.alt || 'Preview';
-            fallback.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgba(255,255,255,0.6); font-size: 0.9rem; text-align: center; pointer-events: none; z-index: 10;';
-            const card = img.closest('.project-card');
-            if (card) {
-              if (getComputedStyle(card).position === 'static') {
-                card.style.position = 'relative';
-              }
-              card.appendChild(fallback);
-            }
-          }
+          if (card) card.classList.add('image-loaded', 'image-error');
         }
 
-        // Immediately process all images - show them right away
-        projectImages.forEach((img, index) => {
-          // Force visibility
-          img.style.opacity = '1';
-          img.style.visibility = 'visible';
-          
-          // Mark as loading initially
-          if (!img.classList.contains('loaded')) {
-            img.classList.add('loading');
-          }
-          
-          // Ensure src is set
-          if (!img.src && img.getAttribute('src')) {
-            img.src = img.getAttribute('src');
-          }
-          
-          // For first 3 images, load immediately (above the fold)
-          const isPriority = index < 3;
-          if (isPriority) {
-            img.loading = 'eager';
-            img.fetchPriority = 'high';
-          }
-          
-          // Check if already loaded
+        projectImages.forEach(img => {
           if (img.complete && img.naturalHeight !== 0) {
-            handleImageLoad(img);
-          } else if (img.complete && img.naturalHeight === 0) {
-            // Image failed to load
-            handleImageError(img);
+            markLoaded(img);
           } else {
-            // Set up load/error handlers
-            img.addEventListener('load', () => handleImageLoad(img), { once: true });
-            img.addEventListener('error', () => handleImageError(img), { once: true });
-            
-            // Faster timeout for priority images, longer for lazy
-            const timeout = isPriority ? 3000 : 6000;
-            setTimeout(() => {
-              if (!img.classList.contains('loaded')) {
-                handleImageError(img);
-              }
-            }, timeout);
+            img.addEventListener('load', () => markLoaded(img), { once: true });
+            img.addEventListener('error', () => markError(img), { once: true });
           }
         });
-
-        // Aggressive preloading for first 3 images
-        const priorityImages = Array.from(projectImages).slice(0, 3);
-        priorityImages.forEach((img, idx) => {
-          if (img.src && !img.complete) {
-            // Create preload link
-            const link = document.createElement('link');
-            link.rel = 'preload';
-            link.as = 'image';
-            link.href = img.src;
-            if (idx === 0) {
-              link.fetchPriority = 'high';
-            }
-            document.head.appendChild(link);
-            
-            // Also preload using Image object for faster loading
-            const preloadImg = new Image();
-            preloadImg.onload = () => {
-              img.src = img.src; // Trigger load
-            };
-            preloadImg.src = img.src;
-          }
-        });
-
-        // Intersection Observer for lazy loading - start loading earlier
-        if ('IntersectionObserver' in window) {
-          const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-              if (entry.isIntersecting) {
-                const img = entry.target;
-                img.style.opacity = '1';
-                img.style.visibility = 'visible';
-                if (!img.complete && !img.classList.contains('loading')) {
-                  img.classList.add('loading');
-                  // Force load
-                  if (img.dataset.src) {
-                    img.src = img.dataset.src;
-                    delete img.dataset.src;
-                  }
-                  // Preload if not already
-                  if (img.src && !img.complete) {
-                    const preloadImg = new Image();
-                    preloadImg.src = img.src;
-                  }
-                }
-                observer.unobserve(img);
-              }
-            });
-          }, {
-            rootMargin: '300px' // Start loading even earlier
-          });
-
-          // Observe all lazy-loaded images
-          projectImages.forEach((img, index) => {
-            // Don't observe first 3 (already loading)
-            if (index >= 3 && img.loading === 'lazy') {
-              imageObserver.observe(img);
-            }
-          });
-        }
       })();
     </script>
   </body>
