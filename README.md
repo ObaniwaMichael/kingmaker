@@ -51,9 +51,8 @@ A modern, responsive portfolio website built with Vite, featuring dynamic theme 
 
 ## Deployment
 
-This portfolio is configured for **Vercel deployment** with AI chat functionality:
+This portfolio is configured for **Vercel deployment**:
 
-- **AI Chat**: Powered by Groq LLM API via Vercel serverless functions
 - **Automatic Scaling**: Serverless architecture handles traffic spikes
 - **Global CDN**: Fast loading worldwide
 - **Zero Configuration**: Automatic builds and deployments
@@ -85,7 +84,6 @@ The portfolio features 6 different color themes that automatically rotate every 
 - **CSS3** - Modern styling with CSS variables and animations
 - **HTML5** - Semantic markup
 - **Vercel** - Serverless deployment platform
-- **Groq AI** - LLM API for intelligent chat functionality
 
 ## Browser Support
 
