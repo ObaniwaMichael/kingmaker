@@ -13,6 +13,8 @@ yarn-error.log*
 dist/
 build/
 .vite/
+.next/
+out/
 
 # Environment variables
 .env
