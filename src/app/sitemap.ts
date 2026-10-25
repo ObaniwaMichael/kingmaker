@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/data/profile";
-import { projects } from "@/data/projects";
+import { projectLinks, projects } from "@/data/projects";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const pages = ["", "/about", "/contact", "/projects"].map((path) => ({
@@ -12,7 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(),
   }));
   const lives = projects.flatMap((p) =>
-    p.links.map((l) => ({
+    projectLinks(p).map((l) => ({
       url: l.url,
       lastModified: new Date(),
     })),

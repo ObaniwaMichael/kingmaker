@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { profile, SITE_URL } from "@/data/profile";
 import { contact } from "@/data/contact";
-import { primaryLink, projects } from "@/data/projects";
+import { githubUrl, projectLinks, projects } from "@/data/projects";
 import "./globals.css";
 
 const jetbrains = JetBrains_Mono({
@@ -17,12 +17,7 @@ const inter = Inter({
   display: "swap",
 });
 
-const OG_FALLBACK_IMAGE = {
-  url: "/wallpapers/laptop-wallpaper.jpg",
-  width: 1200,
-  height: 630,
-  alt: `${profile.name} — ${profile.title}`,
-};
+const homeDescription = profile.tagline;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -30,21 +25,20 @@ export const metadata: Metadata = {
     default: `${profile.name} — ${profile.title}`,
     template: `%s · ${profile.name}`,
   },
-  description: profile.tagline,
+  description: homeDescription,
   alternates: { canonical: SITE_URL },
   openGraph: {
     title: `${profile.name} — ${profile.title}`,
-    description: profile.tagline,
+    description: homeDescription,
     url: SITE_URL,
     siteName: profile.name,
     type: "website",
-    images: [OG_FALLBACK_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: `${profile.name} — ${profile.title}`,
-    description: profile.tagline,
-    images: ["/wallpapers/laptop-wallpaper.jpg"],
+    description: homeDescription,
+    images: ["/opengraph-image"],
   },
 };
 
@@ -60,17 +54,24 @@ const jsonLd = {
   sameAs: [
     contact.github,
     contact.whatsapp,
-    ...projects.flatMap((p) => p.links.map((l) => l.url)),
+    ...projects.flatMap((p) => [
+      ...projectLinks(p).map((l) => l.url),
+      ...(p.repo ? [githubUrl(p.repo)] : []),
+    ]),
   ],
   address: { "@type": "PostalAddress", addressLocality: "Lagos", addressCountry: "NG" },
-  makes: projects.map((p) => ({
-    "@type": "SoftwareApplication",
-    name: p.title,
-    description: p.summary,
-    url: primaryLink(p).url,
-    sameAs: p.links.map((l) => l.url),
-    ...(p.repo ? { codeRepository: `https://github.com/${p.repo}` } : {}),
-  })),
+  makes: projects.map((p) => {
+    const links = projectLinks(p);
+    return {
+      "@type": "SoftwareApplication",
+      name: p.title,
+      description: p.summary,
+      url: `${SITE_URL}/projects/${p.slug}`,
+      ...(links.length > 0 ? { sameAs: links.map((l) => l.url) } : {}),
+      ...(p.repo ? { codeRepository: githubUrl(p.repo) } : {}),
+      applicationCategory: p.category,
+    };
+  }),
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

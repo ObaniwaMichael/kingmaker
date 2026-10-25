@@ -1,7 +1,7 @@
 import { contact } from "@/data/contact";
 import { experience } from "@/data/experience";
 import { profile } from "@/data/profile";
-import { linkFileName, projects } from "@/data/projects";
+import { githubUrl, linkFileName, projectLinks, projects } from "@/data/projects";
 import { skills } from "@/data/skills";
 
 export type FsFile = {
@@ -45,22 +45,29 @@ const readmeMd = [
 ].join("\n");
 
 const projectFiles = projects.map((p) => {
+  const links = projectLinks(p);
   const body = [
     "# " + p.title,
     "",
     p.summary,
     "",
     "Role: " + p.role,
-    "Stack: " + p.stack.join(", "),
-    ...p.links.map((l) => l.label + ": " + l.url),
+    ...(p.stack.length > 0 ? ["Stack: " + p.stack.join(", ")] : []),
+    "Category: " + p.category,
+    "Status: " + p.status,
+    ...links.map((l) => l.label + ": " + l.url),
+    ...(p.repo ? ["Repo: " + githubUrl(p.repo)] : []),
+    ...(links.length === 0 ? ["Private / client work"] : []),
   ].join("\n");
-  if (p.links.length > 1) {
-    return dir(
-      p.slug,
-      p.links.map((l) =>
-        file(linkFileName(l.label), l.url, "browser", l.url, l.label),
-      ),
+  if (links.length > 1) {
+    const children = links.map((l) =>
+      file(linkFileName(l.label), l.url, "browser", l.url, l.label),
     );
+    if (p.repo) {
+      const url = githubUrl(p.repo);
+      children.push(file("github.url", url, "browser", url, "Repo"));
+    }
+    return dir(p.slug, children);
   }
   return file(p.slug + ".md", body, "projects");
 });

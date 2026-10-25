@@ -2,12 +2,18 @@ import type { Metadata } from "next";
 import { profile, SITE_URL } from "@/data/profile";
 import { SiteNav } from "@/components/site/SimpleSite";
 
+const description = `About ${profile.name}, ${profile.title} based in ${profile.location}.`;
+
 export const metadata: Metadata = {
   title: "About",
+  description,
   alternates: { canonical: `${SITE_URL}/about` },
   openGraph: {
     url: `${SITE_URL}/about`,
-    images: [{ url: "/wallpapers/laptop-wallpaper.jpg", width: 1200, height: 630, alt: `${profile.name} — ${profile.title}` }],
+    description,
+  },
+  twitter: {
+    description,
   },
 };
 

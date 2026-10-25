@@ -2,7 +2,7 @@ import Link from "next/link";
 import { contact } from "@/data/contact";
 import { experience } from "@/data/experience";
 import { profile } from "@/data/profile";
-import { projects } from "@/data/projects";
+import { sortedProjects } from "@/data/projects";
 import { skills } from "@/data/skills";
 
 export function SiteNav() {
@@ -36,7 +36,7 @@ export function HomeContent() {
       <section className="mt-8">
         <h2 className="text-xl font-semibold">Projects</h2>
         <ul className="mt-3 space-y-2">
-          {projects.map((p) => (
+          {sortedProjects().map((p) => (
             <li key={p.slug}>
               <Link className="text-accent" href={`/projects/${p.slug}`}>
                 {p.title}

@@ -1,6 +1,6 @@
 import { contact } from "@/data/contact";
 import { profile } from "@/data/profile";
-import { getProject, projects } from "@/data/projects";
+import { getProject, githubUrl, projectLinks, sortedProjects } from "@/data/projects";
 import type { AppId } from "@/store/desktop";
 import type { ThemeName } from "@/lib/themes";
 import { THEMES, THEME_LABELS } from "@/lib/themes";
@@ -104,13 +104,13 @@ export function complete(input: string, cwd: string): string {
     if (tokens.length <= 2) {
       const hit =
         APPS.find((a) => a.startsWith(last)) ??
-        projects.find((p) => p.slug.startsWith(last))?.slug;
+        sortedProjects().find((p) => p.slug.startsWith(last))?.slug;
       if (hit) return `open ${hit}`;
     } else {
       const p = getProject(tokens[1] ?? "");
-      const hit = p?.links.find((l) =>
+      const hit = p ? projectLinks(p).find((l) =>
         l.label.toLowerCase().startsWith(last.toLowerCase()),
-      );
+      ) : undefined;
       if (p && hit) return `open ${p.slug} ${hit.label}`;
     }
   }
@@ -119,7 +119,7 @@ export function complete(input: string, cwd: string): string {
     if (hit) return `theme ${hit}`;
   }
   if (cmd === "project") {
-    const hit = projects.find((p) => p.slug.startsWith(last));
+    const hit = sortedProjects().find((p) => p.slug.startsWith(last));
     if (hit) return `project ${hit.slug}`;
   }
   if (cmd === "cd" || cmd === "cat" || cmd === "ls") {
@@ -223,23 +223,40 @@ export function runCommand(raw: string, ctx: CommandCtx): CommandResult {
     }
     case "projects":
       return {
-        lines: projects.flatMap((p) => [
-          {
-            kind: "text" as const,
-            text: `${p.slug} — ${p.title}`,
-            icon: (p.links.length > 1 ? "folder" : "file") as LineIcon,
-          },
-          ...p.links.map((l) => ({
-            kind: "link" as const,
-            text: `${l.label}: ${l.url}`,
-            href: l.url,
-            icon: "link" as const,
-          })),
-        ]),
+        lines: sortedProjects().flatMap((p) => {
+          const links = projectLinks(p);
+          return [
+            {
+              kind: "text" as const,
+              text: `${p.slug} — ${p.title} [${p.category}]${p.featured ? " ★" : ""}${p.status === "private" ? " (private)" : ""}`,
+              icon: (links.length > 1 ? "folder" : "file") as LineIcon,
+            },
+            ...links.map((l) => ({
+              kind: "link" as const,
+              text: `${l.label}: ${l.url}`,
+              href: l.url,
+              icon: "link" as const,
+            })),
+            ...(p.repo
+              ? [
+                  {
+                    kind: "link" as const,
+                    text: `Repo: ${githubUrl(p.repo)}`,
+                    href: githubUrl(p.repo),
+                    icon: "link" as const,
+                  },
+                ]
+              : []),
+            ...(links.length === 0
+              ? [{ kind: "text" as const, text: "Private / client work" }]
+              : []),
+          ];
+        }),
       };
     case "project": {
-      const p = projects.find((x) => x.slug === arg);
+      const p = sortedProjects().find((x) => x.slug === arg);
       if (!p) return { lines: text("usage: project <slug>") };
+      const links = projectLinks(p);
       ctx.openApp("projects", p.slug, p.title);
       return {
         lines: [
@@ -248,12 +265,26 @@ export function runCommand(raw: string, ctx: CommandCtx): CommandResult {
           ...(p.stack.length > 0
             ? [{ kind: "text" as const, text: `Stack: ${p.stack.join(", ")}` }]
             : []),
-          ...p.links.map((l) => ({
+          { kind: "text" as const, text: `Category: ${p.category}` },
+          ...links.map((l) => ({
             kind: "link" as const,
             text: `${l.label}: ${l.url}`,
             href: l.url,
             icon: "link" as const,
           })),
+          ...(p.repo
+            ? [
+                {
+                  kind: "link" as const,
+                  text: `Repo: ${githubUrl(p.repo)}`,
+                  href: githubUrl(p.repo),
+                  icon: "link" as const,
+                },
+              ]
+            : []),
+          ...(links.length === 0
+            ? [{ kind: "text" as const, text: "Private / client work" }]
+            : []),
         ],
       };
     }
@@ -299,15 +330,16 @@ export function runCommand(raw: string, ctx: CommandCtx): CommandResult {
       }
       const project = getProject(target);
       if (project) {
+        const links = projectLinks(project);
         const hint = labelParts.join(" ").toLowerCase();
         const chosen = hint
-          ? project.links.find(
+          ? links.find(
               (l) =>
                 l.label.toLowerCase().includes(hint) ||
                 l.label.toLowerCase() === hint,
             )
-          : project.links.length === 1
-            ? project.links[0]
+          : links.length === 1
+            ? links[0]
             : undefined;
         if (chosen) {
           ctx.openApp("browser", chosen.url, `${project.title} — ${chosen.label}`);
@@ -322,14 +354,18 @@ export function runCommand(raw: string, ctx: CommandCtx): CommandResult {
             ],
           };
         }
+        if (links.length === 0) {
+          ctx.openApp("projects", project.slug, project.title);
+          return { lines: text(`${project.title}: Private / client work`) };
+        }
         return {
           lines: [
             {
               kind: "text",
-              text: `Select a link for ${project.title} (usage: open ${project.slug} <portal>):`,
+              text: `Select a link for ${project.title} (usage: open ${project.slug} <label>):`,
               icon: "folder",
             },
-            ...project.links.map((l) => ({
+            ...links.map((l) => ({
               kind: "link" as const,
               text: `${l.label} — ${l.url}`,
               href: l.url,

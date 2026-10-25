@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, Folder, Globe } from "lucide-react";
+import { FileText, Folder, Globe, Lock } from "lucide-react";
 import { getNode, HOME_PATH, listDir, normalizePath, type FsDir } from "@/lib/fs";
 import { useDesktop } from "@/store/desktop";
-import { getProject } from "@/data/projects";
+import { getProject, projectLinks } from "@/data/projects";
 
 export function Files() {
   const openApp = useDesktop((s) => s.openApp);
@@ -70,6 +70,9 @@ export function Files() {
             ? names.map((name) => {
                 const child = (node as FsDir).children[name];
                 const isUrl = child.type === "file" && name.endsWith(".url");
+                const slug = name.replace(/\.md$/, "");
+                const project = getProject(slug);
+                const isPrivate = Boolean(project && projectLinks(project).length === 0);
                 return (
                   <button
                     key={name}
@@ -84,6 +87,8 @@ export function Files() {
                       <Folder className="size-4 shrink-0 text-accent" />
                     ) : isUrl ? (
                       <Globe className="size-4 shrink-0 text-accent" />
+                    ) : isPrivate ? (
+                      <Lock className="size-4 shrink-0 text-muted" />
                     ) : (
                       <FileText className="size-4 shrink-0 text-accent-2" />
                     )}

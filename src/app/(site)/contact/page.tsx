@@ -4,12 +4,18 @@ import { profile, SITE_URL } from "@/data/profile";
 import { SiteNav } from "@/components/site/SimpleSite";
 import { Contact } from "@/components/apps/Contact";
 
+const description = `Contact ${profile.name} by email, WhatsApp, GitHub, or the message form.`;
+
 export const metadata: Metadata = {
   title: "Contact",
+  description,
   alternates: { canonical: `${SITE_URL}/contact` },
   openGraph: {
     url: `${SITE_URL}/contact`,
-    images: [{ url: "/wallpapers/laptop-wallpaper.jpg", width: 1200, height: 630, alt: `${profile.name} — ${profile.title}` }],
+    description,
+  },
+  twitter: {
+    description,
   },
 };
 
