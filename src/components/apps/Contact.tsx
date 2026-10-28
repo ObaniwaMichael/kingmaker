@@ -3,10 +3,15 @@
 import { FormEvent, useState } from "react";
 import { contact } from "@/data/contact";
 
+function mailtoHref(name: string, message: string) {
+  const subject = encodeURIComponent(`Portfolio message from ${name}`);
+  const body = encodeURIComponent(message);
+  return `mailto:${contact.email}?subject=${subject}&body=${body}`;
+}
+
 export function Contact() {
   const [status, setStatus] = useState<"idle" | "sending" | "ok" | "err">("idle");
-  const [msg, setMsg] = useState("");
-  const [mailto, setMailto] = useState<string | null>(null);
+  const [fallbackHref, setFallbackHref] = useState<string | null>(null);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -15,63 +20,83 @@ export function Contact() {
     const name = String(data.get("name") ?? "");
     const email = String(data.get("email") ?? "");
     const message = String(data.get("message") ?? "");
+    const website = String(data.get("website") ?? "");
     setStatus("sending");
-    setMailto(null);
+    setFallbackHref(null);
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message }),
+        body: JSON.stringify({ name, email, message, website }),
       });
-      const json = (await res.json()) as { ok?: boolean; error?: string; mailto?: boolean; href?: string };
-      if (json.ok) {
+      const json = (await res.json()) as { ok?: boolean };
+      if (json.ok === true) {
         setStatus("ok");
-        setMsg("Message sent.");
         form.reset();
         return;
       }
-      if (json.mailto && json.href) {
-        setMailto(json.href);
-        setStatus("err");
-        setMsg("Mail service not configured. Use mailto instead.");
-        return;
-      }
+      setFallbackHref(mailtoHref(name, message));
       setStatus("err");
-      setMsg(json.error ?? "Failed");
     } catch {
+      setFallbackHref(mailtoHref(name, message));
       setStatus("err");
-      setMsg("Network error");
     }
   }
 
   return (
-    <form className="flex h-full flex-col gap-3 bg-transparent p-4 text-sm" onSubmit={onSubmit}>
+    <form className="flex h-full flex-col gap-3 bg-transparent p-4 font-mono text-sm" onSubmit={onSubmit}>
       <p className="text-accent-2">raidreaper@portfolio:~/contact$</p>
       <label className="flex flex-col gap-1">
         name
-        <input name="name" required minLength={2} className="border border-border bg-surface/85 px-2 py-1" />
+        <input
+          name="name"
+          required
+          minLength={2}
+          maxLength={100}
+          className="border border-border bg-surface/85 px-2 py-1"
+        />
       </label>
       <label className="flex flex-col gap-1">
         email
-        <input name="email" type="email" required className="border border-border bg-surface/85 px-2 py-1" />
+        <input
+          name="email"
+          type="email"
+          required
+          maxLength={254}
+          className="border border-border bg-surface/85 px-2 py-1"
+        />
+      </label>
+      <label className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+        website
+        <input name="website" type="text" tabIndex={-1} autoComplete="off" />
       </label>
       <label className="flex flex-col gap-1">
         message
-        <textarea name="message" required minLength={10} rows={5} className="border border-border bg-surface/85 px-2 py-1" />
+        <textarea
+          name="message"
+          required
+          minLength={10}
+          maxLength={4000}
+          rows={5}
+          className="border border-border bg-surface/85 px-2 py-1"
+        />
       </label>
-      <button type="submit" disabled={status === "sending"} className="self-start border border-accent px-3 py-1 text-accent">
-        {status === "sending" ? "./send.sh…" : "./send.sh"}
+      <button
+        type="submit"
+        disabled={status === "sending"}
+        className="self-start border border-accent px-3 py-1 text-accent disabled:opacity-50"
+      >
+        {status === "sending" ? "sending…" : "./send.sh"}
       </button>
-      {msg ? <p className={status === "ok" ? "text-accent" : "text-danger"}>{msg}</p> : null}
-      {mailto ? (
-        <a className="text-accent underline" href={mailto}>
-          Open mail client
-        </a>
-      ) : (
-        <a className="text-muted underline" href={`mailto:${contact.email}`}>
-          or mailto:{contact.email}
-        </a>
-      )}
+      {status === "ok" ? <p className="text-accent">Message sent.</p> : null}
+      {status === "err" && fallbackHref ? (
+        <p className="text-danger">
+          Message failed to send. Email me directly:{" "}
+          <a className="text-accent underline" href={fallbackHref}>
+            {contact.email}
+          </a>
+        </p>
+      ) : null}
     </form>
   );
 }
