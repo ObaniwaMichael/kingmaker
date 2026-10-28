@@ -17,20 +17,54 @@ export function Contact() {
     e.preventDefault();
     const form = e.currentTarget;
     const data = new FormData(form);
-    const name = String(data.get("name") ?? "");
-    const email = String(data.get("email") ?? "");
-    const message = String(data.get("message") ?? "");
-    const website = String(data.get("website") ?? "");
+    const name = String(data.get("name") ?? "").trim();
+    const email = String(data.get("email") ?? "").trim();
+    const message = String(data.get("message") ?? "").trim();
+    const website = String(data.get("website") ?? "").trim();
     setStatus("sending");
     setFallbackHref(null);
+
+    if (website) {
+      setStatus("ok");
+      form.reset();
+      return;
+    }
+
+    const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+    if (!accessKey) {
+      setFallbackHref(mailtoHref(name, message));
+      setStatus("err");
+      return;
+    }
+
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message, website }),
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: accessKey,
+          name,
+          email,
+          message,
+          subject: `Portfolio message from ${name}`,
+          from_name: "Portfolio",
+          replyto: email,
+          botcheck: false,
+        }),
       });
-      const json = (await res.json()) as { ok?: boolean };
-      if (json.ok === true) {
+      const raw = await res.text();
+      let json: { success?: boolean };
+      try {
+        json = JSON.parse(raw) as { success?: boolean };
+      } catch {
+        setFallbackHref(mailtoHref(name, message));
+        setStatus("err");
+        return;
+      }
+      if (json.success === true) {
         setStatus("ok");
         form.reset();
         return;
